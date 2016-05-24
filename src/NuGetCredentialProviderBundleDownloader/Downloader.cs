@@ -1,5 +1,4 @@
-﻿using Microsoft.Build.Framework;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -20,17 +19,19 @@ namespace NuGetCredentialProviderBundleDownloader
         /// </summary>
         private static readonly Uri DefaultCredentialBundleUri = new Uri("https://microsoft.pkgs.visualstudio.com/_apis/public/nuget/client/CredentialProviderBundle.zip");
 
-        private readonly IBuildEngine _buildEngine;
+        private readonly Action<string> _logInfo;
+        private readonly Action<string> _logError;
 
         private readonly CancellationToken _cancellationToken;
 
-        public Downloader(IBuildEngine buildEngine, CancellationToken cancellationToken)
+        public Downloader(Action<string> logInfo, Action<string> logError, CancellationToken cancellationToken)
         {
-            _buildEngine = buildEngine;
+            _logInfo = logInfo;
+            _logError = logError;
             _cancellationToken = cancellationToken;
         }
 
-        public static bool Execute(string path, string arguments, IBuildEngine buildEngine = null, CancellationToken cancellationToken = default(CancellationToken))
+        public static bool Execute(string path, string arguments, Action<string> logInfo = null, Action<string> logError = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             // Parse the arguments as a download URL
             //
@@ -48,7 +49,7 @@ namespace NuGetCredentialProviderBundleDownloader
                 downloadUri = uri;
             }
 
-            Downloader downloader = new Downloader(buildEngine, cancellationToken);
+            Downloader downloader = new Downloader(logInfo, logError, cancellationToken);
 
             FileInfo localFile = new FileInfo(Path.Combine(Path.GetTempPath(), Path.GetFileName(downloadUri.LocalPath)));
 
@@ -72,7 +73,7 @@ namespace NuGetCredentialProviderBundleDownloader
                 {
                     try
                     {
-                        LogMessage(MessageImportance.Low, "Determining if credential bundle has already been downloaded");
+                        LogMessage("Determining if credential bundle has already been downloaded");
 
                         if (destination.Exists)
                         {
@@ -84,7 +85,7 @@ namespace NuGetCredentialProviderBundleDownloader
 
                             if (destination.Length == size)
                             {
-                                LogMessage(MessageImportance.Low, "Credential bundle has already been downloaded");
+                                LogMessage("Credential bundle has already been downloaded");
                                 return true;
                             }
                         }
@@ -128,18 +129,13 @@ namespace NuGetCredentialProviderBundleDownloader
 
         private void LogMessage(string format, params object[] args)
         {
-            LogMessage(MessageImportance.Normal, format, args);
-        }
-
-        private void LogMessage(MessageImportance messageImportance, string format, params object[] args)
-        {
-            if (_buildEngine == null)
+            if (_logInfo == null)
             {
                 Console.WriteLine(format, args);
             }
             else
             {
-                _buildEngine.LogMessageEvent(new BuildMessageEventArgs(format, null, "DownloadNuGet", messageImportance, DateTime.UtcNow, args));
+                _logInfo(String.Format(format, args));
             }
         }
 
@@ -178,7 +174,7 @@ namespace NuGetCredentialProviderBundleDownloader
 
         private void Unzip(string path, string destination, params string[] patterns)
         {
-            LogMessage(MessageImportance.Low, "Unzipping credential bundle");
+            LogMessage("Unzipping credential bundle");
 
             ICollection<string> unzippedFiles = new List<string>();
 
@@ -207,7 +203,7 @@ namespace NuGetCredentialProviderBundleDownloader
                                 {
                                     using (Stream writeStream = File.Open(item.Destination.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                                     {
-                                        LogMessage(MessageImportance.Low, "Unzipping file '{0}' -> '{1}'", item.Source.FullName, item.Destination.FullName);
+                                        LogMessage("Unzipping file '{0}' -> '{1}'", item.Source.FullName, item.Destination.FullName);
                                         readStream.CopyToAsync(writeStream).Wait(_cancellationToken);
                                     }
                                 }
@@ -216,7 +212,7 @@ namespace NuGetCredentialProviderBundleDownloader
                             }
                             else
                             {
-                                LogMessage(MessageImportance.Low, "File '{0}' is already up-to-date", item.Destination.FullName);
+                                LogMessage("File '{0}' is already up-to-date", item.Destination.FullName);
                             }
                         }
                     }

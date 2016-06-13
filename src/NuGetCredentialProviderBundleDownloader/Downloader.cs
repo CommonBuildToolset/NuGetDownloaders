@@ -20,14 +20,12 @@ namespace NuGetCredentialProviderBundleDownloader
         private static readonly Uri DefaultCredentialBundleUri = new Uri("https://microsoft.pkgs.visualstudio.com/_apis/public/nuget/client/CredentialProviderBundle.zip");
 
         private readonly Action<string> _logInfo;
-        private readonly Action<string> _logError;
 
         private readonly CancellationToken _cancellationToken;
 
-        public Downloader(Action<string> logInfo, Action<string> logError, CancellationToken cancellationToken)
+        public Downloader(Action<string> logInfo, CancellationToken cancellationToken)
         {
             _logInfo = logInfo;
-            _logError = logError;
             _cancellationToken = cancellationToken;
         }
 
@@ -43,13 +41,13 @@ namespace NuGetCredentialProviderBundleDownloader
 
                 if (!Uri.TryCreate(arguments, UriKind.Absolute, out uri) || !Path.GetFileName(uri.LocalPath).Equals("CredentialProviderBundle.zip", StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new ArgumentException(String.Format("The specified NuGet downloader arguments '{0}' are invalid.  The value must be a valid URL that points to CredentialProviderBundle.zip.", arguments));
+                    throw new ArgumentException($"The specified NuGet downloader arguments '{arguments}' are invalid.  The value must be a valid URL that points to CredentialProviderBundle.zip.");
                 }
 
                 downloadUri = uri;
             }
 
-            Downloader downloader = new Downloader(logInfo, logError, cancellationToken);
+            Downloader downloader = new Downloader(logInfo, cancellationToken);
 
             FileInfo localFile = new FileInfo(Path.Combine(Path.GetTempPath(), Path.GetFileName(downloadUri.LocalPath)));
 

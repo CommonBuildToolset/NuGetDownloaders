@@ -103,8 +103,15 @@ namespace NuGetCredentialProviderBundleDownloader
 
                         return true;
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
+                        if (e is AggregateException)
+                        {
+                            e = ((AggregateException)e).Flatten().InnerExceptions.Last();
+                        }
+
+                        _logInfo($"{e.Message}");
+
                         webClient.CancelAsync();
 
                         if (destination.Exists)
@@ -121,7 +128,12 @@ namespace NuGetCredentialProviderBundleDownloader
                             }
                         }
 
-                        return false;
+                        if (e is OperationCanceledException)
+                        {
+                            return false;
+                        }
+
+                        throw;
                     }
                 }
             }, TimeSpan.FromSeconds(3));

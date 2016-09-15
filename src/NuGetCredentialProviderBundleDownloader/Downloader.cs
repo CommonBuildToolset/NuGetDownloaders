@@ -29,7 +29,7 @@ namespace NuGetCredentialProviderBundleDownloader
             _cancellationToken = cancellationToken;
         }
 
-        public static bool Execute(string path, string arguments, Action<string> logInfo = null, Action<string> logError = null, CancellationToken cancellationToken = default(CancellationToken))
+        public static bool Execute(string path, string arguments, Action<string> logInfo, Action<string> logError, CancellationToken cancellationToken = default(CancellationToken))
         {
             // Parse the arguments as a download URL
             //

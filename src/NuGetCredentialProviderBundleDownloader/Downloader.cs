@@ -19,9 +19,8 @@ namespace NuGetCredentialProviderBundleDownloader
         /// </summary>
         private static readonly Uri DefaultCredentialBundleUri = new Uri("https://microsoft.pkgs.visualstudio.com/_apis/public/nuget/client/CredentialProviderBundle.zip");
 
-        private readonly Action<string> _logInfo;
-
         private readonly CancellationToken _cancellationToken;
+        private readonly Action<string> _logInfo;
 
         public Downloader(Action<string> logInfo, CancellationToken cancellationToken)
         {
@@ -55,7 +54,7 @@ namespace NuGetCredentialProviderBundleDownloader
             {
                 // Only unzip .exe, .dll, and .config files to make it a little faster.  This could cause issues if dependencies are not unzipped...
                 //
-                downloader.Unzip(localFile.FullName, path, patterns: new[] { ".exe", ".dll", ".config" });
+                downloader.Unzip(localFile.FullName, path, patterns: new[] {".exe", ".dll", ".config"});
 
                 return true;
             }
@@ -105,7 +104,7 @@ namespace NuGetCredentialProviderBundleDownloader
                     {
                         if (e is AggregateException)
                         {
-                            e = ((AggregateException)e).Flatten().InnerExceptions.Last();
+                            e = ((AggregateException) e).Flatten().InnerExceptions.Last();
                         }
 
                         _logInfo($"{e.Message}");
@@ -232,7 +231,7 @@ namespace NuGetCredentialProviderBundleDownloader
             {
                 // Clean up any unzipped files
                 //
-                Parallel.ForEach(unzippedFiles.Where(i => File.Exists(i)), unzippedFile => { Retry(() => File.Delete(unzippedFile), TimeSpan.FromMilliseconds(200)); });
+                Parallel.ForEach(unzippedFiles.Where(File.Exists), unzippedFile => { Retry(() => File.Delete(unzippedFile), TimeSpan.FromMilliseconds(200)); });
 
                 throw;
             }

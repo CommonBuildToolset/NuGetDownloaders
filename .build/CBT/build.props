@@ -54,7 +54,7 @@
     <CBTNuGetDownloaderClassName Condition=" '$(CBTNuGetDownloaderClassName)' == '' ">CBT.Core.Internal.DefaultNuGetDownloader</CBTNuGetDownloaderClassName>
     <CBTModuleRestoreTaskName Condition=" '$(CBTModuleRestoreTaskName)' == '' ">CBT.Core.Tasks.RestoreModules</CBTModuleRestoreTaskName>
     <CBTModuleRestoreCommand Condition=" '$(CBTModuleRestoreCommand)' == '' ">$(CBTNuGetBinDir)\NuGet.exe</CBTModuleRestoreCommand>
-    <CBTModuleRestoreCommandArguments Condition=" '$(CBTModuleRestoreCommandArguments)' == '' ">restore &quot;$(CBTModulePackageConfigPath)&quot; -OutputDirectory &quot;$(NuGetPackagesPath)&quot; -ConfigFile &quot;$(NuGetConfigPath)&quot; -MSBuildVersion &quot;$(MSBuildToolsVersion)&quot; -NonInteractive</CBTModuleRestoreCommandArguments>
+    <CBTModuleRestoreCommandArguments Condition=" '$(CBTModuleRestoreCommandArguments)' == '' ">restore &quot;$(CBTModulePackageConfigPath)&quot; -OutputDirectory &quot;$(NuGetPackagesPath)&quot; -ConfigFile &quot;$(NuGetConfigPath)&quot; -NonInteractive</CBTModuleRestoreCommandArguments>
     <CBTModuleRestoreInputs Condition=" '$(CBTModuleRestoreInputs)' == '' ">$(MSBuildThisFileFullPath);$(CBTCoreAssemblyPath);$(CBTModulePackageConfigPath)</CBTModuleRestoreInputs>
 
     <CBTModulesRestored Condition=" '$(BuildingInsideVisualStudio)' != 'true' And '$(CBTModulesRestored)' != 'true' And Exists('$(CBTCoreAssemblyPath)') ">$(CBTCoreAssemblyPath.GetType().Assembly.GetType('System.AppDomain').GetProperty('CurrentDomain').GetValue(null, null).CreateInstanceFromAndUnwrap($(CBTCoreAssemblyPath), $(CBTModuleRestoreTaskName)).Execute($(CBTModuleImportsAfter.Split(';')), $(CBTModuleImportsBefore.Split(';')), $(CBTModuleExtensionsPath), $(CBTModulePropertiesFile), $(CBTNuGetDownloaderAssemblyPath), $(CBTNuGetDownloaderClassName), '$(CBTNuGetDownloaderArguments)', $(CBTModuleRestoreInputs.Split(';')), $(CBTModulePackageConfigPath), $(NuGetPackagesPath), $(CBTModuleRestoreCommand), $(CBTModuleRestoreCommandArguments)))</CBTModulesRestored>
@@ -66,9 +66,11 @@
   <UsingTask TaskName="RestoreModules" AssemblyFile="$(CBTCoreAssemblyPath)" />
 
   <Target Name="RestoreCBTModules"
-      Condition=" '$(CBTModulesRestored)' == '' "
+      Condition=" '$(CBTModulesRestored)' != 'true' "
       Inputs="$(CBTModuleRestoreInputs)"
       Outputs="$(CBTModulePropertiesFile)">
+    
+    <Error Condition=" '$(CBTModulesRestored)' == 'false' " Text="Modules were not restored and the build cannot continue.  Refer to other errors for more information." />
 
     <RestoreModules
       AfterImports="$(CBTModuleImportsAfter.Split(';'))"

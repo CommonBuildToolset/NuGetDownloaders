@@ -12,5 +12,29 @@
     <TargetFrameworkVersion Condition=" '$(TargetFrameworkVersion)' == '' ">v4.5</TargetFrameworkVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(MSBuildProjectExtension)' == '.csproj' ">
+    <AppDesignerFolder Condition=" '$(AppDesignerFolder)' == '' ">Properties</AppDesignerFolder>
+    <FileAlignment Condition=" '$(FileAlignment)' == '' ">512</FileAlignment>
+    <DefineConstants Condition=" !$(DefineConstants.Contains('TRACE')) ">$(DefineConstants);TRACE</DefineConstants>
+    <ErrorReport Condition=" '$(ErrorReport)' == '' ">prompt</ErrorReport>
+    <WarningLevel Condition=" '$(WarningLevel)' == '' ">4</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(MSBuildProjectExtension)' == '.csproj' And '$(Configuration)' == 'Debug' ">
+    <DebugSymbols Condition=" '$(DebugSymbols)' == '' ">true</DebugSymbols>
+    <DebugType Condition=" '$(DebugType)' == '' ">full</DebugType>
+    <Optimize Condition=" '$(Optimize)' == '' ">false</Optimize>
+    <DefineConstants Condition=" !$(DefineConstants.Contains('DEBUG')) ">$(DefineConstants);DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(MSBuildProjectExtension)' == '.csproj' And '$(Configuration)' == 'Release' ">
+    <DebugType Condition=" '$(DebugType)' == '' ">pdbonly</DebugType>
+    <Optimize Condition=" '$(Optimize)' == '' ">true</Optimize>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <EnableNerdbank_GitVersioning Condition=" '$(EnableNerdbank_GitVersioning)' == '' ">true</EnableNerdbank_GitVersioning>
+  </PropertyGroup>
+
   <Import Project="$(EnlistmentRoot)\.build\CBT\build.props" />
 </Project>
